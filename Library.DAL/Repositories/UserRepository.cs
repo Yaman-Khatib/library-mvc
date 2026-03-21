@@ -1,5 +1,6 @@
 using Library.BL.Entities;
 using Library.BL.Interfaces.Repositories;
+using Library.BL.Interfaces.Repositories.Models;
 using Library.DAL.Db;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
@@ -17,6 +18,51 @@ public sealed class UserRepository : IUserRepository
         _logger = logger;
     }
 
+    public async Task<UserAuthRecord?> GetAuthByEmailAsync(string email, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            await connection.OpenAsync(cancellationToken);
+
+            const string sql = """
+                               SELECT Id, Email, PasswordHash, FirstName, LastName, Role
+                               FROM Users
+                               WHERE Email = @Email;
+                               """;
+
+            using var command = new SqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@Email", email);
+
+            using var reader = await command.ExecuteReaderAsync(cancellationToken);
+            if (!await reader.ReadAsync(cancellationToken))
+            {
+                return null;
+            }
+
+            var role = reader.GetString(reader.GetOrdinal("Role"));
+            return new UserAuthRecord
+            {
+                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                Email = reader.GetString(reader.GetOrdinal("Email")),
+                PasswordHash = reader.GetString(reader.GetOrdinal("PasswordHash")),
+                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                Role = ParseRole(role),
+            };
+        }
+        catch (SqlException ex)
+        {
+            _logger.LogError(ex, "DB error while reading user auth by email {Email}.", email);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while reading user auth by email {Email}.", email);
+            throw;
+        }
+    }
+
     public async Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         try
@@ -25,7 +71,7 @@ public sealed class UserRepository : IUserRepository
             await connection.OpenAsync(cancellationToken);
 
             const string sql = """
-                               SELECT Id, FirstName, LastName, DateOfBirth, Role, CreatedAt
+                               SELECT Id, Email, FirstName, LastName, DateOfBirth, Role, CreatedAt
                                FROM Users
                                WHERE Id = @Id;
                                """;
@@ -61,7 +107,7 @@ public sealed class UserRepository : IUserRepository
             await connection.OpenAsync(cancellationToken);
 
             const string sql = """
-                               SELECT Id, FirstName, LastName, DateOfBirth, Role, CreatedAt
+                               SELECT Id, Email, FirstName, LastName, DateOfBirth, Role, CreatedAt
                                FROM Users
                                ORDER BY LastName, FirstName;
                                """;
@@ -89,7 +135,7 @@ public sealed class UserRepository : IUserRepository
         }
     }
 
-    public async Task<int> AddAsync(User user, CancellationToken cancellationToken = default)
+    public async Task<int> AddWithPasswordHashAsync(User user, string passwordHash, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -97,12 +143,14 @@ public sealed class UserRepository : IUserRepository
             await connection.OpenAsync(cancellationToken);
 
             const string sql = """
-                               INSERT INTO Users (FirstName, LastName, DateOfBirth, Role)
+                               INSERT INTO Users (Email, PasswordHash, FirstName, LastName, DateOfBirth, Role)
                                OUTPUT INSERTED.Id
-                               VALUES (@FirstName, @LastName, @DateOfBirth, @Role);
+                               VALUES (@Email, @PasswordHash, @FirstName, @LastName, @DateOfBirth, @Role);
                                """;
 
             using var command = new SqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@Email", user.Email);
+            command.Parameters.AddWithValue("@PasswordHash", passwordHash);
             command.Parameters.AddWithValue("@FirstName", user.FirstName);
             command.Parameters.AddWithValue("@LastName", user.LastName);
             command.Parameters.AddWithValue("@DateOfBirth", user.DateOfBirth);
@@ -132,7 +180,8 @@ public sealed class UserRepository : IUserRepository
 
             const string sql = """
                                UPDATE Users
-                               SET FirstName = @FirstName,
+                               SET Email = @Email,
+                                   FirstName = @FirstName,
                                    LastName = @LastName,
                                    DateOfBirth = @DateOfBirth,
                                    Role = @Role
@@ -141,6 +190,7 @@ public sealed class UserRepository : IUserRepository
 
             using var command = new SqlCommand(sql, connection);
             command.Parameters.AddWithValue("@Id", user.Id);
+            command.Parameters.AddWithValue("@Email", user.Email);
             command.Parameters.AddWithValue("@FirstName", user.FirstName);
             command.Parameters.AddWithValue("@LastName", user.LastName);
             command.Parameters.AddWithValue("@DateOfBirth", user.DateOfBirth);
@@ -194,6 +244,7 @@ public sealed class UserRepository : IUserRepository
         return new User
         {
             Id = reader.GetInt32(reader.GetOrdinal("Id")),
+            Email = reader.GetString(reader.GetOrdinal("Email")),
             FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
             LastName = reader.GetString(reader.GetOrdinal("LastName")),
             DateOfBirth = reader.GetDateTime(reader.GetOrdinal("DateOfBirth")),
@@ -221,4 +272,3 @@ public sealed class UserRepository : IUserRepository
     private static DateTime SpecifyUtc(DateTime value) =>
         value.Kind == DateTimeKind.Utc ? value : DateTime.SpecifyKind(value, DateTimeKind.Utc);
 }
-
