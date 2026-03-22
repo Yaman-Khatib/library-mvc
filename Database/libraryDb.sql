@@ -32,6 +32,15 @@ CREATE TABLE Users (
     CONSTRAINT CK_Users_Role CHECK (Role IN ('User', 'Admin'))
 );
 
+alter table users 
+Add 
+Email nvarchar(100) not null unique,
+PasswordHash nvarchar(255) not null;
+
+CREATE UNIQUE INDEX IDX_USERS_EMAIL
+ON USERS(EMAIL);
+
+
 
 -- BOOKS
 CREATE TABLE Books (
@@ -118,3 +127,8 @@ INSERT INTO Genres (Name) VALUES
 ('Programming'),
 ('Science'),
 ('History');
+
+use LibraryDb;
+BACKUP DATABASE LibraryDB
+TO DISK = 'C:\learning_coding\companies-assestments\Library-MVC\Database\LibraryDB.bak'
+WITH INIT;
