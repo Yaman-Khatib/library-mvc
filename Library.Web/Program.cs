@@ -3,6 +3,7 @@ using Library.BL.Interfaces.Services;
 using Library.BL.Services;
 using Library.DAL.Db;
 using Library.DAL.Repositories;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Library.Web
 {
@@ -14,6 +15,18 @@ namespace Library.Web
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            builder.Services
+                .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/Account/Login";
+                    options.AccessDeniedPath = "/Account/AccessDenied";
+                    options.SlidingExpiration = true;
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+                });
 
             builder.Services.AddScoped<ISqlConnectionFactory>(sp =>
             {
@@ -35,6 +48,7 @@ namespace Library.Web
 
             builder.Services.AddScoped<IBookService, BookService>();
             builder.Services.AddScoped<IBorrowingService, BorrowingService>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
 
             var app = builder.Build();
 
@@ -49,6 +63,7 @@ namespace Library.Web
             app.UseHttpsRedirection();
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapStaticAssets();
