@@ -117,7 +117,7 @@ public sealed class AuthController : Controller
     public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Index", "Books");
     }
 
     [HttpGet]
