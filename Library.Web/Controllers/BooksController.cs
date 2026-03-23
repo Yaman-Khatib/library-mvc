@@ -13,6 +13,7 @@ namespace Library.Web.Controllers;
 public class BooksController : Controller
 {
     private readonly IBookService _books;
+    private const int DefaultItemsPerPage = 8;
 
     public BooksController(IBookService books)
     {
@@ -20,14 +21,55 @@ public class BooksController : Controller
     }
 
     [AllowAnonymous]
-    public async Task<IActionResult> Index(string? search, string? language, string? author)
+    public async Task<IActionResult> Index(string? search, string? language, string? author, int page = 1, CancellationToken cancellationToken = default)
     {
         var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
         var userRole = User.FindFirst(ClaimTypes.Role)?.Value ?? "";
         var isAdmin = userRole == "Admin";
 
-        var dto = new BookSearchDto { Title = search, Author = author, LanguageName = language };
-        var result = await _books.SearchAsync(dto);
+        var languagesResult = await _books.GetLanguagesAsync(cancellationToken);
+        var authorsResult = await _books.GetAuthorsAsync(cancellationToken);
+
+        var languageNames = languagesResult.IsSuccess && languagesResult.Value is not null
+            ? languagesResult.Value.Select(l => l.Name).ToList()
+            : new List<string>();
+
+        var authors = authorsResult.IsSuccess && authorsResult.Value is not null
+            ? authorsResult.Value.ToList()
+            : new List<string>();
+
+        if (page <= 0)
+        {
+            page = 1;
+        }
+
+        var dto = new BookSearchDto
+        {
+            Title = search,
+            Author = author,
+            LanguageName = language,
+            Page = page,
+            ItemsPerPage = DefaultItemsPerPage,
+        };
+
+        var totalCountResult = await _books.CountAsync(dto, cancellationToken);
+        var totalItems = totalCountResult.IsSuccess ? totalCountResult.Value : 0;
+        var totalPages = totalItems <= 0 ? 1 : (int)Math.Ceiling(totalItems / (double)DefaultItemsPerPage);
+
+        if (page > totalPages)
+        {
+            page = totalPages;
+            dto = new BookSearchDto
+            {
+                Title = search,
+                Author = author,
+                LanguageName = language,
+                Page = page,
+                ItemsPerPage = DefaultItemsPerPage,
+            };
+        }
+
+        var result = await _books.SearchAsync(dto, cancellationToken);
         
         if (!result.IsSuccess)
         {
@@ -35,7 +77,16 @@ public class BooksController : Controller
             { 
                 Books = new List<BookDisplayViewModel>(),
                 IsAuthenticated = isAuthenticated,
-                IsAdmin = isAdmin
+                IsAdmin = isAdmin,
+                SearchQuery = search,
+                SelectedLanguage = language,
+                SelectedAuthor = author,
+                Languages = languageNames,
+                Authors = authors,
+                Page = page,
+                ItemsPerPage = DefaultItemsPerPage,
+                TotalItems = totalItems,
+                TotalPages = totalPages,
             });
         }
 
@@ -50,7 +101,13 @@ public class BooksController : Controller
             IsAdmin = isAdmin,
             SearchQuery = search,
             SelectedLanguage = language,
-            SelectedAuthor = author
+            SelectedAuthor = author,
+            Languages = languageNames,
+            Authors = authors,
+            Page = page,
+            ItemsPerPage = DefaultItemsPerPage,
+            TotalItems = totalItems,
+            TotalPages = totalPages,
         };
 
         return View(model);
@@ -64,6 +121,7 @@ public class BooksController : Controller
         return View(result.Value!.ToDetailsViewModel());
     }
 
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create()
     {
         await PopulateSelectListsAsync();
@@ -71,9 +129,12 @@ public class BooksController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(BookFormViewModel model, CancellationToken cancellationToken)
     {
+        model.AvailableCopies = model.TotalCopies;
+
         if (!ModelState.IsValid)
         {
             await PopulateSelectListsAsync();
@@ -83,13 +144,14 @@ public class BooksController : Controller
         var result = await _books.AddAsync(model.ToNewEntity(), cancellationToken);
         if (!result.IsSuccess)
         {
-            TempData["Error"] = result.ErrorMessage;
+            ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Could not create the book.");
             await PopulateSelectListsAsync();
             return View(model);
         }
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(int id)
     {
         var result = await _books.GetByIdAsync(id);
@@ -99,6 +161,7 @@ public class BooksController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(BookFormViewModel model, CancellationToken cancellationToken)
     {
@@ -111,7 +174,7 @@ public class BooksController : Controller
         var result = await _books.UpdateAsync(model.ToExistingEntity(), cancellationToken);
         if (!result.IsSuccess)
         {
-            TempData["Error"] = result.ErrorMessage;
+            ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Could not update the book.");
             await PopulateSelectListsAsync();
             return View(model);
         }
@@ -119,6 +182,7 @@ public class BooksController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
