@@ -2,6 +2,8 @@
 
 Library MVC is a layered ASP.NET Core MVC application for managing a small library catalog and a borrowing workflow. It is designed as a company style assignment with a clean separation between the Web layer (MVC), Business layer (services), and Data Access layer (ADO.NET repositories).
 
+[Screenshot 2026-03-23 172041.png](https://github.com/Yaman-Khatib/library-mvc/blob/865fd9ff81152863d1a88ad621caca41674c748e/Screenshot%202026-03-23%20172007.png)
+
 ## Roles and access
 
 The application uses cookie based authentication and role based authorization.
