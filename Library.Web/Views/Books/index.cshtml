@@ -202,11 +202,12 @@
                                         <a asp-action="Details" asp-route-id="@book.Id" class="text-sm font-semibold text-[#904d00] hover:underline">View Details</a>
                                         @if (Model.IsAuthenticated && book.IsAvailable)
                                         {
-                                            <form method="post" action="/Borrowings/Borrow" style="display: inline;">
-                                                <input type="hidden" name="bookId" value="@book.Id" />
-                                                <input type="hidden" name="dueDate" value="@DateTime.UtcNow.AddDays(30).ToString("yyyy-MM-dd")" />
-                                                <button type="submit" class="text-xs font-semibold text-green-600 hover:underline cursor-pointer">Borrow</button>
-                                            </form>
+                                            <a asp-controller="Borrowings"
+                                               asp-action="Create"
+                                               asp-route-bookId="@book.Id"
+                                               class="text-xs font-semibold text-green-600 hover:underline">
+                                                Borrow
+                                            </a>
                                         }
                                     </div>
                                 </div>
