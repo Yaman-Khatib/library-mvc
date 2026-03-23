@@ -40,8 +40,10 @@ PasswordHash nvarchar(255) not null;
 CREATE UNIQUE INDEX IDX_USERS_EMAIL
 ON USERS(EMAIL);
 
+use LibraryDB;
 
 
+insert into books (tite
 -- BOOKS
 CREATE TABLE Books (
     Id INT IDENTITY PRIMARY KEY,
@@ -128,7 +130,42 @@ INSERT INTO Genres (Name) VALUES
 ('Science'),
 ('History');
 
-use LibraryDb;
-BACKUP DATABASE LibraryDB
-TO DISK = 'C:\learning_coding\companies-assestments\Library-MVC\Database\LibraryDB.bak'
-WITH INIT;
+INSERT INTO Users 
+(FirstName, LastName, DateOfBirth, Role, CreatedAt, Email, PasswordHash)
+VALUES 
+(
+    'Zeid',
+    'Hatem',
+    '2000-01-01 00:00:00.0000000',
+    'Admin',
+    GETDATE(),
+    'admin@example.com',
+    'AQAAAAIAAYagAAAAEK7RbzdFDk6U8GRFptmHBQyzoPO+U0AONi5E2SqfsqQuNEsYBj7IW8Zdm7wsNU+g+Q=='
+);
+
+INSERT INTO Books 
+(Title, Author, ISBN, TotalCopies, AvailableCopies, Description, LanguageId, GenreId, CreatedAt)
+VALUES
+
+('Clean Code', 'Robert C. Martin', '9780132350884', 10, 8, 'A handbook of agile software craftsmanship.', 1, 1, GETDATE()),
+
+('The Pragmatic Programmer', 'Andrew Hunt', '9780201616224', 12, 10, 'Journey to mastery for modern software developers.', 1, 1, GETDATE()),
+
+('Design Patterns', 'Erich Gamma', '9780201633610', 8, 5, 'Elements of reusable object-oriented software.', 1, 1, GETDATE()),
+
+('Refactoring', 'Martin Fowler', '9780201485677', 7, 6, 'Improving the design of existing code.', 1, 1, GETDATE()),
+
+('Introduction to Algorithms', 'Thomas H. Cormen', '9780262033848', 15, 12, 'Comprehensive guide to algorithms.', 1, 2, GETDATE()),
+
+('You Don’t Know JS', 'Kyle Simpson', '9781491904244', 9, 7, 'Deep dive into JavaScript core mechanisms.', 1, 2, GETDATE()),
+
+('Eloquent JavaScript', 'Marijn Haverbeke', '9781593279509', 11, 9, 'Modern introduction to JavaScript programming.', 1, 2, GETDATE()),
+
+('Deep Work', 'Cal Newport', '9781455586691', 6, 4, 'Rules for focused success in a distracted world.', 2, 3, GETDATE()),
+
+('Atomic Habits', 'James Clear', '9780735211292', 14, 11, 'An easy & proven way to build good habits.', 2, 3, GETDATE()),
+
+('The Lean Startup', 'Eric Ries', '9780307887894', 10, 8, 'How today’s entrepreneurs use innovation.', 3, 3, GETDATE()),
+
+('Zero to One', 'Peter Thiel', '9780804139298', 9, 6, 'Notes on startups and building the future.', 3, 3, GETDATE());
+
