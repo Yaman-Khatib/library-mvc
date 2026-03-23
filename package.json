@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "@tailwindcss/vite": "^4.2.2"
+  },
+  "scripts": {
+    "build:css": "tailwindcss --input ./Library.Web/Styles/tailwind.css --output ./Library.Web/wwwroot/css/tailwind.css --minify",
+    "watch:css": "tailwindcss --input ./Library.Web/Styles/tailwind.css --output ./Library.Web/wwwroot/css/tailwind.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.2.2",
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.2.2"
+  }
+}
