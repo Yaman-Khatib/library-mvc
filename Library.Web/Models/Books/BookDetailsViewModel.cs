@@ -11,7 +11,7 @@ public sealed class BookDetailsViewModel
     public string? Description { get; set; }
     public required string Language { get; set; }
     public required string Genre { get; set; }
-    public string CoverImagePath { get; set; } = "/images/books/default.jpg";
+    public string CoverImagePath { get; set; } = "/images/books/default.png";
     public bool IsAvailable => AvailableCopies > 0;
 }
 
