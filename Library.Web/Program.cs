@@ -20,8 +20,8 @@ namespace Library.Web
                 .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
-                    options.LoginPath = "/Account/Login";
-                    options.AccessDeniedPath = "/Account/AccessDenied";
+                    options.LoginPath = "/Auth/Login";
+                    options.AccessDeniedPath = "/Auth/AccessDenied";
                     options.SlidingExpiration = true;
                     options.Cookie.HttpOnly = true;
                     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
