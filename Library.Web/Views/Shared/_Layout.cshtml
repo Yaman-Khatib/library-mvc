@@ -35,11 +35,7 @@
                     @if (isAuthenticated)
                     {
                         <a asp-controller="Borrowings" asp-action="Index" class="px-3 py-2 rounded-md text-sm font-semibold text-[#091426] hover:text-[#904d00] hover:bg-white/70 transition">Borrowing</a>
-                    }
-                    @if (isAdmin)
-                    {
-                        <a asp-controller="Users" asp-action="Index" class="px-3 py-2 rounded-md text-sm font-semibold text-[#091426] hover:text-[#904d00] hover:bg-white/70 transition">Users</a>
-                    }
+                    }                    
                 </div>
 
                 <div class="flex items-center gap-4">
