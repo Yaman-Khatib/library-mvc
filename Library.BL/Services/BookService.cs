@@ -31,6 +31,13 @@ public sealed class BookService : IBookService
         return Result<IReadOnlyList<BookSearchRow>>.Success(rows);
     }
 
+    public async Task<Result<int>> CountAsync(BookSearchDto search, CancellationToken cancellationToken = default)
+    {
+        var normalized = NormalizeSearch(search);
+        var count = await _bookRepository.CountAsync(normalized, cancellationToken);
+        return Result<int>.Success(count);
+    }
+
     public async Task<Result<Book>> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         if (id <= 0)
@@ -79,6 +86,12 @@ public sealed class BookService : IBookService
             .Select(l => new LookupItemDto { Id = l.Id, Name = l.Name })
             .ToList();
         return Result<IReadOnlyList<LookupItemDto>>.Success(items);
+    }
+
+    public async Task<Result<IReadOnlyList<string>>> GetAuthorsAsync(CancellationToken cancellationToken = default)
+    {
+        var authors = await _bookRepository.ListAuthorsAsync(cancellationToken);
+        return Result<IReadOnlyList<string>>.Success(authors);
     }
 
     public async Task<Result<int>> AddAsync(Book book, CancellationToken cancellationToken = default)
