@@ -1,0 +1,155 @@
+@model Library.Web.Models.Borrowings.BorrowingsListViewModel
+@{
+    ViewData["Title"] = "My Borrowings";
+}
+
+<div class="bg-white">
+    @if (TempData["Success"] != null)
+    {
+        <div class="bg-[#d4edda] border-l-4 border-[#28a745] p-4 mb-6 mx-6 mt-6 rounded">
+            <p class="text-[#155724] font-semibold">✓ @TempData["Success"]</p>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="bg-[#f8d7da] border-l-4 border-[#dc3545] p-4 mb-6 mx-6 mt-6 rounded">
+            <p class="text-[#721c24] font-semibold">✕ @TempData["Error"]</p>
+        </div>
+    }
+
+    <div class="bg-[#f7f9fb] border-b border-[#e0e3e5] mb-8">
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#091426] mb-2">My Borrowings</h1>
+            <p class="text-[#45474c]">Track your borrowed books and return history</p>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 pb-12">
+        @if (Model.HasAnyBorrowings)
+        {
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-[#f2f4f6] rounded-lg p-4">
+                    <p class="text-xs text-[#45474c] uppercase tracking-widest font-semibold mb-1">Total</p>
+                    <p class="text-3xl font-bold text-[#091426]">@Model.TotalBorrowings</p>
+                </div>
+                <div class="bg-[#c5d6f1] rounded-lg p-4">
+                    <p class="text-xs text-[#111c2d] uppercase tracking-widest font-semibold mb-1">Active</p>
+                    <p class="text-3xl font-bold text-[#091426]">@Model.ActiveBorrowings</p>
+                </div>
+                <div class="bg-[#d8e3fb] rounded-lg p-4">
+                    <p class="text-xs text-[#111c2d] uppercase tracking-widest font-semibold mb-1">Returned</p>
+                    <p class="text-3xl font-bold text-[#091426]">@Model.ReturnedBorrowings</p>
+                </div>
+                <div class="bg-[#ffdad6] rounded-lg p-4">
+                    <p class="text-xs text-[#93000a] uppercase tracking-widest font-semibold mb-1">Overdue</p>
+                    <p class="text-3xl font-bold text-[#931c0a]">@Model.OverdueBorrowings</p>
+                </div>
+            </div>
+
+            <div class="bg-white border border-[#e0e3e5] rounded-lg overflow-hidden mb-8">
+                <div class="px-6 py-4 bg-[#f2f4f6] border-b border-[#e0e3e5]">
+                    <h2 class="text-sm font-bold text-[#091426] uppercase tracking-widest">Active Borrowings</h2>
+                </div>
+                @if (Model.Active.Any())
+                {
+                    <table class="w-full">
+                        <thead class="bg-[#f7f9fb] border-b border-[#e0e3e5]">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-[#45474c] uppercase tracking-widest">Book</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-[#45474c] uppercase tracking-widest">Borrowed</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-[#45474c] uppercase tracking-widest">Due</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-[#45474c] uppercase tracking-widest">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var borrowing in Model.Active)
+                            {
+                                <tr class="border-b border-[#e0e3e5] hover:bg-[#f7f9fb] transition">
+                                    <td class="px-6 py-4">
+                                        <a asp-controller="Books" asp-action="Details" asp-route-id="@borrowing.BookId" class="font-semibold text-[#191c1e] hover:underline">
+                                            @borrowing.BookTitle
+                                        </a>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-[#45474c]">@borrowing.BorrowDateUtc.ToString("MMM d, yyyy")</td>
+                                    <td class="px-6 py-4 text-sm text-[#45474c]">@borrowing.DueDateUtc.ToString("MMM d, yyyy")</td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            @if (borrowing.IsOverdue)
+                                            {
+                                                <span class="inline-block px-3 py-1 bg-[#ffdad6] text-[#93000a] text-xs font-bold rounded uppercase">Overdue</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="inline-block px-3 py-1 bg-[#c5d6f1] text-[#091426] text-xs font-bold rounded uppercase">Active</span>
+                                            }
+                                            <form asp-action="Return" method="post" class="inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@borrowing.Id" />
+                                                <button type="submit" class="text-xs font-semibold text-[#904d00] hover:underline">Return</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="px-6 py-8 text-[#45474c]">No active borrowings.</div>
+                }
+            </div>
+
+            <div class="bg-white border border-[#e0e3e5] rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-[#f2f4f6] border-b border-[#e0e3e5]">
+                    <h2 class="text-sm font-bold text-[#091426] uppercase tracking-widest">Returned</h2>
+                </div>
+                @if (Model.Returned.Any())
+                {
+                    <table class="w-full">
+                        <thead class="bg-[#f7f9fb] border-b border-[#e0e3e5]">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-[#45474c] uppercase tracking-widest">Book</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-[#45474c] uppercase tracking-widest">Borrowed</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-[#45474c] uppercase tracking-widest">Due</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-[#45474c] uppercase tracking-widest">Returned</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var borrowing in Model.Returned)
+                            {
+                                <tr class="border-b border-[#e0e3e5] hover:bg-[#f7f9fb] transition">
+                                    <td class="px-6 py-4">
+                                        <a asp-controller="Books" asp-action="Details" asp-route-id="@borrowing.BookId" class="font-semibold text-[#191c1e] hover:underline">
+                                            @borrowing.BookTitle
+                                        </a>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-[#45474c]">@borrowing.BorrowDateUtc.ToString("MMM d, yyyy")</td>
+                                    <td class="px-6 py-4 text-sm text-[#45474c]">@borrowing.DueDateUtc.ToString("MMM d, yyyy")</td>
+                                    <td class="px-6 py-4 text-sm text-[#45474c]">@borrowing.ReturnDateUtc?.ToString("MMM d, yyyy")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="px-6 py-8 text-[#45474c]">No returned borrowings yet.</div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-16">
+                <div class="mb-6">                    
+                    <h2 class="text-2xl font-bold text-[#091426] mb-2">No borrows yet</h2>
+                    <p class="text-[#45474c] mb-6">You haven't borrowed any books. Start exploring our collection!</p>
+                    <a asp-controller="Books" asp-action="Index" class="inline-block px-6 py-3 bg-gradient-to-br from-[#091426] to-[#1e293b] text-white rounded-md font-semibold hover:opacity-90 transition">
+                        View Available Books
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+

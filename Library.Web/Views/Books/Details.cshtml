@@ -1,0 +1,72 @@
+@model Library.Web.Models.Books.BookDetailsViewModel
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="bg-white">
+    <!-- Header Section (same vibe as Index) -->
+    <div class="bg-[#f7f9fb] border-b border-[#e0e3e5] mb-8">
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <p class="text-xs font-bold text-[#75777d] uppercase tracking-widest mb-2">Book Details</p>
+                    <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#091426] mb-2">@Model.Title</h1>
+                    <p class="text-[#45474c] max-w-2xl">@Model.Author</p>
+                </div>
+                <div class="flex gap-3">
+                    <a asp-action="Index" class="px-4 py-2 bg-white border border-[#c5c6cd] rounded-md text-sm font-semibold text-[#091426] hover:border-[#904d00] hover:text-[#904d00] transition">Back to list</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-6 pb-12">
+        <div class="flex flex-col lg:flex-row gap-8">
+            <div class="w-full lg:w-80 flex-shrink-0">
+                <div class="rounded-lg overflow-hidden bg-gray-100 border border-[#e0e3e5]">
+                    <img src="@Model.CoverImagePath" alt="@Model.Title" class="w-full h-96 object-cover" />
+                </div>
+                <div class="mt-4">
+                    @if (Model.IsAvailable)
+                    {
+                        <span class="inline-block px-3 py-1 bg-[#d8e3fb] text-[#111c2d] text-xs font-bold rounded uppercase tracking-wider">Available</span>
+                    }
+                    else
+                    {
+                        <span class="inline-block px-3 py-1 bg-[#ffdcc3] text-[#2f1500] text-xs font-bold rounded uppercase tracking-wider">Reserved</span>
+                    }
+                </div>
+            </div>
+
+            <div class="flex-1 min-w-0">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                    <div class="p-4 bg-[#f7f9fb] rounded-lg border border-[#e0e3e5]">
+                        <p class="text-xs font-bold text-[#75777d] uppercase tracking-widest mb-1">Genre</p>
+                        <p class="text-sm text-[#191c1e] font-semibold">@Model.Genre</p>
+                    </div>
+                    <div class="p-4 bg-[#f7f9fb] rounded-lg border border-[#e0e3e5]">
+                        <p class="text-xs font-bold text-[#75777d] uppercase tracking-widest mb-1">Language</p>
+                        <p class="text-sm text-[#191c1e] font-semibold">@Model.Language</p>
+                    </div>
+                    <div class="p-4 bg-[#f7f9fb] rounded-lg border border-[#e0e3e5]">
+                        <p class="text-xs font-bold text-[#75777d] uppercase tracking-widest mb-1">ISBN</p>
+                        <p class="text-sm text-[#191c1e] font-semibold">@Model.Isbn</p>
+                    </div>
+                    <div class="p-4 bg-[#f7f9fb] rounded-lg border border-[#e0e3e5]">
+                        <p class="text-xs font-bold text-[#75777d] uppercase tracking-widest mb-1">Availability</p>
+                        <p class="text-sm text-[#191c1e] font-semibold">@Model.AvailableCopies / @Model.TotalCopies</p>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Description))
+                {
+                    <div class="bg-white rounded-lg border border-[#e0e3e5] p-6">
+                        <h2 class="text-lg font-bold text-[#091426] mb-2">Description</h2>
+                        <p class="text-[#45474c] leading-relaxed">@Model.Description</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

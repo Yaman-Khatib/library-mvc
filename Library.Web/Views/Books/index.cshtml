@@ -1,0 +1,320 @@
+@model Library.Web.Models.Books.BooksListViewModel
+@{
+    ViewData["Title"] = "Books Collection";
+}
+
+<div class="bg-white">
+    <!-- Header Section -->
+    <div class="bg-[#f7f9fb] border-b border-[#e0e3e5] mb-8">
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#091426] mb-2">Books Collection</h1>
+            <p class="text-[#45474c] max-w-2xl">Exploring the foundations of human thought through our curated collection of classical literature and philosophical manuscripts.</p>
+            
+            <!-- Top Controls -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-6 gap-3">
+                <div class="flex gap-3">
+                    @if (Model.IsAdmin)
+                    {
+                        <a asp-action="Create" class="my-6 px-4 py-2 bg-gradient-to-br from-[#091426] to-[#1e293b] text-white rounded-md text-sm font-semibold hover:opacity-90">+ New Entry</a>
+                    }
+                </div>                
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-6 pb-12">
+        <!-- Mobile Filters Collapsible -->
+        <details class="block md:hidden mb-6 bg-[#f2f4f6] rounded-lg">
+            <summary class="px-4 py-3 cursor-pointer font-semibold text-[#091426] hover:bg-[#e8ecf0] transition">
+                 Filters
+            </summary>
+            <div class="px-4 pb-4 space-y-6 border-t border-[#e0e3e5]">
+                <!-- Catalog Badge -->
+                <div>
+                    <span class="text-xs font-bold text-[#75777d] uppercase tracking-widest">Catalog</span>
+                </div>
+
+                <form method="get" class="space-y-6">
+                    <input type="hidden" name="search" value="@Model.SearchQuery" />
+
+                <!-- Languages Filter -->
+                <div>
+                    <h3 class="text-xs font-bold text-[#45474c] uppercase tracking-widest mb-3">Languages</h3>
+                    <div class="space-y-2">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" name="language" value="" @((string.IsNullOrWhiteSpace(Model.SelectedLanguage)) ? "checked" : "") class="mr-2" />
+                            <span class="text-sm text-[#45474c]">All</span>
+                        </label>
+
+                        @foreach (var lang in Model.Languages)
+                        {
+                            var isSelected = string.Equals(Model.SelectedLanguage, lang, StringComparison.OrdinalIgnoreCase);
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="language" value="@lang" @(isSelected ? "checked" : "") class="mr-2" />
+                                <span class="text-sm text-[#45474c]">@lang</span>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <!-- Availability Filter -->
+                <div>
+                    <h3 class="text-xs font-bold text-[#45474c] uppercase tracking-widest mb-3">Availability</h3>
+                    <label class="flex items-center cursor-pointer mb-2">
+                        <input type="checkbox" class="mr-2" />
+                        <span class="text-sm text-[#45474c]">Available Now</span>
+                    </label>
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" class="mr-2" />
+                        <span class="text-sm text-[#45474c]">All</span>
+                    </label>
+                </div>
+
+                <!-- Authors Filter -->
+                <div>
+                    <h3 class="text-xs font-bold text-[#45474c] uppercase tracking-widest mb-3">Authors</h3>
+                    <select name="author" class="w-full px-3 py-2 bg-white border border-[#c5c6cd] rounded-md text-sm">
+                        <option value="" selected="@(string.IsNullOrWhiteSpace(Model.SelectedAuthor) ? "selected" : null)">All</option>
+                        @foreach (var a in Model.Authors)
+                        {
+                            <option value="@a" selected="@(string.Equals(Model.SelectedAuthor, a, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@a</option>
+                        }
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full px-4 py-2 bg-gradient-to-br from-[#091426] to-[#1e293b] text-white rounded-md text-sm font-semibold hover:opacity-90">
+                    Apply Filters
+                </button>
+                </form>
+            </div>
+        </details>
+
+        <div class="flex flex-col md:flex-row gap-8">
+            <!-- Sidebar (Desktop Only) -->
+            <div class="hidden md:block md:w-48 flex-shrink-0">
+                <div class="sticky top-6">
+                    <!-- Catalog Badge -->
+                    <div class="mb-8">
+                        <span class="text-xs font-bold text-[#75777d] uppercase tracking-widest">Catalog</span>
+                    </div>
+
+                    <form method="get" class="space-y-2">
+                        <input type="hidden" name="search" value="@Model.SearchQuery" />
+
+                    <!-- Languages Filter -->
+                    <div class="mb-8">
+                        <h3 class="text-xs font-bold text-[#45474c] uppercase tracking-widest mb-4">Languages</h3>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" name="language" value="" @((string.IsNullOrWhiteSpace(Model.SelectedLanguage)) ? "checked" : "") class="mr-2" />
+                            <span class="text-sm text-[#45474c]">All</span>
+                        </label>
+
+                        @foreach (var lang in Model.Languages)
+                        {
+                            var isSelected = string.Equals(Model.SelectedLanguage, lang, StringComparison.OrdinalIgnoreCase);
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="language" value="@lang" @(isSelected ? "checked" : "") class="mr-2" />
+                                <span class="text-sm text-[#45474c]">@lang</span>
+                            </label>
+                        }
+                    </div>
+
+                    <!-- Availability Filter -->
+                    <div class="mb-8">
+                        <h3 class="text-xs font-bold text-[#45474c] uppercase tracking-widest mb-4">Availability</h3>
+                        <label class="flex items-center cursor-pointer mb-2">
+                            <input type="checkbox" class="mr-2" />
+                            <span class="text-sm text-[#45474c]">Available Now</span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" class="mr-2" />
+                            <span class="text-sm text-[#45474c]">All</span>
+                        </label>
+                    </div>
+
+                    <!-- Authors Filter -->
+                    <div class="mb-8">
+                        <h3 class="text-xs font-bold text-[#45474c] uppercase tracking-widest mb-4">Authors</h3>
+                        <select name="author" class="w-full px-3 py-2 bg-white border border-[#c5c6cd] rounded-md text-sm">
+                            <option value="" selected="@(string.IsNullOrWhiteSpace(Model.SelectedAuthor) ? "selected" : null)">All</option>
+                            @foreach (var a in Model.Authors)
+                            {
+                                <option value="@a" selected="@(string.Equals(Model.SelectedAuthor, a, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@a</option>
+                            }
+                        </select>
+                    </div>
+
+                    <button type="submit" class="w-full px-4 py-2 bg-gradient-to-br from-[#091426] to-[#1e293b] text-white rounded-md text-sm font-semibold hover:opacity-90">
+                        Apply Filters
+                    </button>
+                    </form>
+
+                    @if (Model.IsAdmin)
+                    {
+                        <a asp-action="Create" class="block text-center w-full mt-4 px-4 py-2 bg-gradient-to-br from-[#091426] to-[#1e293b] text-white rounded-md text-sm font-semibold hover:opacity-90">+ New Entry</a>
+                    }
+                </div>
+            </div>
+
+            <!-- Books Grid -->
+            <div class="flex-1 min-w-0">
+                <!-- Search Bar -->
+                <form method="get" class="mb-8">
+                    <div class="relative">
+                        <input type="text" name="search" value="@Model.SearchQuery" placeholder="Search archives..." class="w-full px-4 py-3 bg-[#f2f4f6] rounded-md border-b-2 border-[#75777d] border-opacity-30 focus:border-[#904d00] focus:outline-none transition" />
+                        <input type="hidden" name="language" value="@Model.SelectedLanguage" />
+                        <input type="hidden" name="author" value="@Model.SelectedAuthor" />
+                        <button type="submit" class="absolute right-3 top-3 text-[#45474c]">Search</button>
+                    </div>
+                </form>
+
+                @if (Model.Books.Any())
+                {
+                    <!-- Books Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                        @foreach (var book in Model.Books)
+                        {
+                            <div class="bg-white rounded-lg overflow-hidden hover:shadow-lg transition">
+                                <!-- Book Cover -->
+                                <div class="relative h-64 bg-gray-200 overflow-hidden group">
+                                    <img src="@book.CoverImagePath" alt="@book.Title" class="w-full h-full object-cover group-hover:scale-105 transition" />
+                                    
+                                    <!-- Status Badge -->
+                                    <div class="absolute top-3 right-3">
+                                        @if (book.IsAvailable)
+                                        {
+                                            <span class="inline-block px-3 py-1 bg-[#d8e3fb] text-[#111c2d] text-xs font-bold rounded uppercase tracking-wider">Available</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="inline-block px-3 py-1 bg-[#ffdcc3] text-[#2f1500] text-xs font-bold rounded uppercase tracking-wider">Reserved</span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Book Info -->
+                                <div class="p-4">
+                                    <h3 class="text-sm font-bold text-[#191c1e] mb-1 line-clamp-2">@book.Title</h3>
+                                    <p class="text-xs text-[#45474c] mb-2">@book.Author</p>
+                                    <p class="text-xs text-[#45474c] mb-3">@book.Genre</p>
+                                    <div class="flex justify-between items-center">
+                                        <a asp-action="Details" asp-route-id="@book.Id" class="text-sm font-semibold text-[#904d00] hover:underline">View Details</a>
+                                        @if (Model.IsAuthenticated && book.IsAvailable)
+                                        {
+                                            <a asp-controller="Borrowings"
+                                               asp-action="Create"
+                                               asp-route-bookId="@book.Id"
+                                               class="text-xs font-semibold text-green-600 hover:underline">
+                                                Borrow
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="flex justify-center items-center gap-2 mt-12">
+                        @{
+                            var totalPages = Math.Max(1, Model.TotalPages);
+                            var currentPage = Model.Page <= 0 ? 1 : Math.Min(Model.Page, totalPages);
+
+                            var previousPage = currentPage > 1 ? currentPage - 1 : 1;
+                            var nextPage = currentPage < totalPages ? currentPage + 1 : totalPages;
+
+                            var start = Math.Max(1, currentPage - 2);
+                            var end = Math.Min(totalPages, start + 4);
+                            start = Math.Max(1, end - 4);
+                        }
+
+                        <a asp-action="Index"
+                           asp-route-page="@previousPage"
+                           asp-route-search="@Model.SearchQuery"
+                           asp-route-language="@Model.SelectedLanguage"
+                           asp-route-author="@Model.SelectedAuthor"
+                           class="px-3 py-2 @(currentPage == 1 ? "text-[#c5c6cd] pointer-events-none" : "text-[#45474c]")">
+                            ← Previous
+                        </a>
+
+                        @if (start > 1)
+                        {
+                            <a asp-action="Index"
+                               asp-route-page="1"
+                               asp-route-search="@Model.SearchQuery"
+                               asp-route-language="@Model.SelectedLanguage"
+                               asp-route-author="@Model.SelectedAuthor"
+                               class="px-3 py-2 text-[#45474c]">
+                                1
+                            </a>
+                            @if (start > 2)
+                            {
+                                <span class="text-[#45474c]">...</span>
+                            }
+                        }
+
+                        @for (var p = start; p <= end; p++)
+                        {
+                            <a asp-action="Index"
+                               asp-route-page="@p"
+                               asp-route-search="@Model.SearchQuery"
+                               asp-route-language="@Model.SelectedLanguage"
+                               asp-route-author="@Model.SelectedAuthor"
+                               class="px-3 py-2 @(p == currentPage ? "bg-[#091426] text-white rounded-md font-semibold" : "text-[#45474c]")">
+                                @p
+                            </a>
+                        }
+
+                        @if (end < totalPages)
+                        {
+                            @if (end < totalPages - 1)
+                            {
+                                <span class="text-[#45474c]">...</span>
+                            }
+                            <a asp-action="Index"
+                               asp-route-page="@totalPages"
+                               asp-route-search="@Model.SearchQuery"
+                               asp-route-language="@Model.SelectedLanguage"
+                               asp-route-author="@Model.SelectedAuthor"
+                               class="px-3 py-2 text-[#45474c]">
+                                @totalPages
+                            </a>
+                        }
+
+                        <a asp-action="Index"
+                           asp-route-page="@nextPage"
+                           asp-route-search="@Model.SearchQuery"
+                           asp-route-language="@Model.SelectedLanguage"
+                           asp-route-author="@Model.SelectedAuthor"
+                           class="px-3 py-2 @(currentPage == totalPages ? "text-[#c5c6cd] pointer-events-none" : "text-[#45474c]")">
+                            Next →
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-12">
+                        <p class="text-[#45474c]">No books found matching your criteria.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<div class="bg-[#f7f9fb] border-t border-[#e0e3e5] mt-12 py-8">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="flex justify-between items-center text-xs text-[#45474c]">
+            <p>Library MVC - © 2025 Library MVC. All rights reserved.</p>
+            <div class="flex gap-4">
+                <a href="#" class="hover:text-[#091426]">Privacy Policy</a>
+                <a href="#" class="hover:text-[#091426]">Terms of Access</a>
+                <a href="#" class="hover:text-[#091426]">Accessibility</a>
+                <a href="#" class="hover:text-[#091426]">Digital Rights</a>
+                <a href="#" class="hover:text-[#091426]">Contact Support</a>
+            </div>
+        </div>
+    </div>
+</div>

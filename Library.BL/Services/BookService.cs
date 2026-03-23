@@ -9,10 +9,17 @@ namespace Library.BL.Services;
 public sealed class BookService : IBookService
 {
     private readonly IBookRepository _bookRepository;
+    private readonly IGenreRepository _genreRepository;
+    private readonly ILanguageRepository _languageRepository;
 
-    public BookService(IBookRepository bookRepository)
+    public BookService(
+        IBookRepository bookRepository,
+        IGenreRepository genreRepository,
+        ILanguageRepository languageRepository)
     {
         _bookRepository = bookRepository;
+        _genreRepository = genreRepository;
+        _languageRepository = languageRepository;
     }
 
     public async Task<Result<IReadOnlyList<BookSearchRow>>> SearchAsync(
@@ -22,6 +29,13 @@ public sealed class BookService : IBookService
         var normalized = NormalizeSearch(search);
         var rows = await _bookRepository.SearchAsync(normalized, cancellationToken);
         return Result<IReadOnlyList<BookSearchRow>>.Success(rows);
+    }
+
+    public async Task<Result<int>> CountAsync(BookSearchDto search, CancellationToken cancellationToken = default)
+    {
+        var normalized = NormalizeSearch(search);
+        var count = await _bookRepository.CountAsync(normalized, cancellationToken);
+        return Result<int>.Success(count);
     }
 
     public async Task<Result<Book>> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -38,6 +52,46 @@ public sealed class BookService : IBookService
         }
 
         return Result<Book>.Success(book);
+    }
+
+    public async Task<Result<BookDetailsDto>> GetDetailsByIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        if (id <= 0)
+        {
+            return Result<BookDetailsDto>.Fail(ErrorCodes.ValidationError, "Id is required.");
+        }
+
+        var book = await _bookRepository.GetDetailsByIdAsync(id, cancellationToken);
+        if (book is null)
+        {
+            return Result<BookDetailsDto>.Fail(ErrorCodes.NotFound, "Book not found.");
+        }
+
+        return Result<BookDetailsDto>.Success(book);
+    }
+
+    public async Task<Result<IReadOnlyList<LookupItemDto>>> GetGenresAsync(CancellationToken cancellationToken = default)
+    {
+        var rows = await _genreRepository.ListAsync(cancellationToken);
+        var items = rows
+            .Select(g => new LookupItemDto { Id = g.Id, Name = g.Name })
+            .ToList();
+        return Result<IReadOnlyList<LookupItemDto>>.Success(items);
+    }
+
+    public async Task<Result<IReadOnlyList<LookupItemDto>>> GetLanguagesAsync(CancellationToken cancellationToken = default)
+    {
+        var rows = await _languageRepository.ListAsync(cancellationToken);
+        var items = rows
+            .Select(l => new LookupItemDto { Id = l.Id, Name = l.Name })
+            .ToList();
+        return Result<IReadOnlyList<LookupItemDto>>.Success(items);
+    }
+
+    public async Task<Result<IReadOnlyList<string>>> GetAuthorsAsync(CancellationToken cancellationToken = default)
+    {
+        var authors = await _bookRepository.ListAuthorsAsync(cancellationToken);
+        return Result<IReadOnlyList<string>>.Success(authors);
     }
 
     public async Task<Result<int>> AddAsync(Book book, CancellationToken cancellationToken = default)
@@ -92,6 +146,7 @@ public sealed class BookService : IBookService
         var title = NormalizeText(search.Title, 200);
         var author = NormalizeText(search.Author, 200);
         var isbn = NormalizeText(search.Isbn, 20);
+        var languageName = NormalizeText(search.LanguageName, 100);
         var page = search.Page <= 0 ? 1 : search.Page;
         var itemsPerPage = search.ItemsPerPage <= 0 ? 10 : search.ItemsPerPage;
         if (itemsPerPage > 100)
@@ -104,6 +159,7 @@ public sealed class BookService : IBookService
             Title = title,
             Author = author,
             Isbn = isbn,
+            LanguageName = languageName,
             Page = page,
             ItemsPerPage = itemsPerPage,
         };
