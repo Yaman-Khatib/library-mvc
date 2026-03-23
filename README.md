@@ -134,7 +134,8 @@ When you change Tailwind classes in Razor views, re run the build or keep the wa
 ## Usage
 
 - Browse books at `/Books`
-- Login at `/Auth/Login`
+- Login at `/Auth/Login` there is a seeded admin in the Database/libraryDb.sql
+- Use : email: `admin@example.com` and password: `password`
 - Borrow an available book from the books list (requires authentication)
 - View personal borrowings at `/Borrowings` (requires authentication)
 
