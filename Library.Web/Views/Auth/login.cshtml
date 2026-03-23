@@ -1,0 +1,71 @@
+@model Library.Web.Models.Auth.LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Library MVC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-white">
+    <div class="min-h-screen flex items-center justify-center px-4">
+        <div class="w-full max-w-md">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-[#091426] mb-2">Library MVC</h1>
+                <p class="text-[#45474c]">Sign in to your account</p>
+            </div>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div asp-validation-summary="ModelOnly" class="mb-4 p-4 bg-[#ffdad6] text-[#93000a] rounded-md text-sm"></div>
+            }
+
+            <form asp-action="Login" method="post" class="space-y-4">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="ReturnUrl" />
+
+                <div>
+                    <label asp-for="Email" class="block text-sm font-semibold text-[#191c1e] mb-2"></label>
+                    <input asp-for="Email" class="w-full px-4 py-2 bg-[#e0e3e5] rounded-md border-b-2 border-[#75777d] border-opacity-30 focus:border-[#904d00] focus:outline-none transition" placeholder="you@example.com" autocomplete="email" />
+                    <span asp-validation-for="Email" class="text-[#93000a] text-xs"></span>
+                </div>
+                
+                <div>
+                    <label asp-for="Password" class="block text-sm font-semibold text-[#191c1e] mb-2"></label>
+                    <input asp-for="Password" class="w-full px-4 py-2 bg-[#e0e3e5] rounded-md border-b-2 border-[#75777d] border-opacity-30 focus:border-[#904d00] focus:outline-none transition" placeholder="••••••••" autocomplete="current-password" />
+                    <span asp-validation-for="Password" class="text-[#93000a] text-xs"></span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <input asp-for="RememberMe" class="h-4 w-4 accent-[#904d00]" />
+                    <label asp-for="RememberMe" class="text-sm text-[#191c1e]"></label>
+                </div>
+
+                <button type="submit" class="w-full px-6 py-3 bg-gradient-to-br from-[#091426] to-[#1e293b] text-white rounded-md font-semibold hover:opacity-90 transition">Sign In</button>
+            </form>
+
+            <p class="text-center text-[#45474c] mt-6">
+                Don't have an account?
+                <a asp-action="Signup" asp-route-returnUrl="@Model.ReturnUrl" class="text-[#904d00] font-semibold hover:underline">Sign up</a>
+            </p>
+
+            <p class="text-center text-xs text-[#45474c] mt-4">
+                Demo: admin@library.com / admin123<br/>
+                Demo: user@library.com / user123
+            </p>
+        </div>
+    </div>
+
+    <partial name="_ValidationScriptsPartial" />
+</body>
+</html>

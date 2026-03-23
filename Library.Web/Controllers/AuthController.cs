@@ -10,11 +10,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Library.Web.Controllers;
 
-public sealed class AccountController : Controller
+public sealed class AuthController : Controller
 {
     private readonly IAuthService _authService;
 
-    public AccountController(IAuthService authService)
+    public AuthController(IAuthService authService)
     {
         _authService = authService;
     }
@@ -23,6 +23,11 @@ public sealed class AccountController : Controller
     [AllowAnonymous]
     public IActionResult Login(string? returnUrl = null)
     {
+        if (User.Identity?.IsAuthenticated ?? false)
+        {
+            return RedirectToAction("Index", "Books");
+        }
+
         return View(new LoginViewModel { ReturnUrl = returnUrl });
     }
 
@@ -55,20 +60,25 @@ public sealed class AccountController : Controller
             return Redirect(model.ReturnUrl);
         }
 
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Index", "Books");
     }
 
     [HttpGet]
     [AllowAnonymous]
-    public IActionResult Register(string? returnUrl = null)
+    public IActionResult Signup(string? returnUrl = null)
     {
+        if (User.Identity?.IsAuthenticated ?? false)
+        {
+            return RedirectToAction("Index", "Books");
+        }
+
         return View(new RegisterViewModel { ReturnUrl = returnUrl });
     }
 
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Register(RegisterViewModel model, CancellationToken cancellationToken)
+    public async Task<IActionResult> Signup(RegisterViewModel model, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
         {
@@ -87,7 +97,7 @@ public sealed class AccountController : Controller
 
         if (!result.IsSuccess || result.Value is null)
         {
-            ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Could not create account.");
+            ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Could not register.");
             return View(model);
         }
 
@@ -98,7 +108,7 @@ public sealed class AccountController : Controller
             return Redirect(model.ReturnUrl);
         }
 
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Index", "Books");
     }
 
     [HttpPost]
