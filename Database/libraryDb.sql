@@ -1,4 +1,5 @@
 
+drop database libraryDb;
 -- Library system task
 
 CREATE DATABASE LibraryDB;
@@ -43,7 +44,7 @@ ON USERS(EMAIL);
 use LibraryDB;
 
 
-insert into books (tite
+
 -- BOOKS
 CREATE TABLE Books (
     Id INT IDENTITY PRIMARY KEY,
@@ -165,7 +166,7 @@ VALUES
 
 ('Atomic Habits', 'James Clear', '9780735211292', 14, 11, 'An easy & proven way to build good habits.', 2, 3, GETDATE()),
 
-('The Lean Startup', 'Eric Ries', '9780307887894', 10, 8, 'How today’s entrepreneurs use innovation.', 3, 3, GETDATE()),
+('The Lean Startup', 'Eric Ries', '9780307887894', 10, 8, 'How today�s entrepreneurs use innovation.', 3, 3, GETDATE()),
 
 ('Zero to One', 'Peter Thiel', '9780804139298', 9, 6, 'Notes on startups and building the future.', 3, 3, GETDATE());
 
